@@ -1,0 +1,31 @@
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy_job:
+    runs-on: ubuntu-latest
+    name: deploy
+    steps:
+      - id: open-firewall
+        uses: ferulisses/aws-manage-firewall-action@v1.2
+        with:
+          rule-id: 'sg-0d1fb5b1d4d93782e'
+          rule-name: 'singtao-production-yak-cms-sandbox-group'
+          port: 22
+          protocol: tcp
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-east-1'  # adjust to your region
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: deploy file
+        uses: wlixcc/SFTP-Deploy-Action@v1.0
+        with:
+          username: 'aituser'
+          server: '3.95.160.89'
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }} 
+          local_path: './*'
+          remote_path: '/var/www_test/html'
+          args: '-o ConnectTimeout=5'
+
